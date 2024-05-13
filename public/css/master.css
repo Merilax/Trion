@@ -1,0 +1,89 @@
+:root {
+    font-family: Arial, Helvetica, sans-serif;
+
+    --bgdark: #222;
+    --bglight: #f2f2f2;
+
+    --txtdark: #eee;
+    --txtlight: #111;
+
+    --depth-dark1: #333;
+    --depth-dark2: #555;
+    --depth-dark3: #777;
+    --depth-dark4: #999;
+    --depth-dark5: #bbb;
+
+    --color-dark1: #246;
+    --color-dark2: #358;
+    --color-dark3: #46a;
+    --color-dark4: #57c;
+    --color-dark5: #68e;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    *::-webkit-scrollbar {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: #246;
+    }
+}
+
+p {
+    color: var(--txtdark);
+}
+
+#chat-div p {
+    margin: 3px 0;
+}
+
+body {
+    background-color: var(--bgdark);
+    overflow: hidden;
+}
+
+header {
+    background-color: #444448;
+    height: 8dvh;
+}
+
+main {
+    background-color: #333;
+    height: 92dvh;
+}
+
+#chat-div {
+    height: 92%;
+    padding: 10px;
+    overflow-y: scroll;
+}
+
+#textbox-div {
+    height: 8%;
+    padding: 10px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+#textbox-input {
+    width: 90%;
+    resize: none;
+}
+
+#textbox-send {
+    width: 5%;
+}
+
+input {
+    background-color: var(--depth-dark1);
+    border: 0;
+    color: var(--txtdark);
+    font-size: 1rem;
+}
+
+button {
+    background-color: var(--color-dark5);
+    border: 0;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "trion",
+  "version": "1.0.0",
+  "description": "A simple web chat application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node run test/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.4",
+    "drizzle-orm": "^0.30.10",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "mariadb": "^3.3.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7",
+    "pg": "^8.11.5",
+    "postgres": "^3.4.4",
+    "sequelize": "^6.37.3",
+    "ws": "^8.16.0"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8"
+  },
+  "type": "module"
+}
