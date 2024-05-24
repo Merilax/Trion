@@ -1,6 +1,6 @@
-import { Sequelize, DataTypes, Model } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize";
 
-const sequelize = new Sequelize("bw2slbtnackrf8e2q6we", "uvok1mgwgwe30cstjj1d", "xZx3Q89bl8cLImhyl3NN7q826W2Bq9", {
+const sequelize = new Sequelize(process.env.SQLURL, {
     host: 'bw2slbtnackrf8e2q6we-postgresql.services.clever-cloud.com',
     dialect: 'postgres',
     logging: false,
@@ -12,12 +12,12 @@ sequelize.authenticate()
     .then(console.log("Sequelize connected to database succesfully."))
     .catch(err => console.log("Error connecting to Sequelize database: " + err));
 
-class Message extends Model { }
-Message.init({
+const Message = sequelize.define("message", {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
+        allowNull: false
     },
     userId: {
         type: DataTypes.STRING,
@@ -36,4 +36,27 @@ Message.init({
     deletedAt: "deletedAt",
     paranoid: true
 });
-export { Message };
+
+const User = sequelize.define("user", {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+    },
+    userId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    nickname: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    avatarBlob: {
+        type: DataTypes.BLOB
+    }
+});
+
+sequelize.sync({ force: false, alter: true });
+
+export { Message, User };

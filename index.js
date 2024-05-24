@@ -20,18 +20,25 @@ const options = {
 };
 
 // Init Express server
+import session from 'express-session';
 const app = express();
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '/public/views'));
 
-import { router } from './routes/chat.js';
-app.use('/', router);
-app.use('/static', express.static('public'));
-
-//app.listen(PORT, console.log("Server listening on port " + PORT));
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    name: 'trion.auth',
+    cookie: {
+        maxAge: 60000 * 60 * 24
+    },
+    resave: true,
+    saveUninitialized: true
+}));
 
 const server = https.createServer(options, app);
 server.listen(PORT, console.log("Server listening on port " + PORT));
+
+app.get('/', (req, res, next) => {
+    
+});
 
 // Init websocket server
 const wss = new WebSocketServer({ server: server });
