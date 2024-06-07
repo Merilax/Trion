@@ -1,5 +1,5 @@
 import "dotenv/config";
-import config from "./config.json" assert { type: "json" };
+//import config from "./config.json" assert { type: "json" };
 
 import path from "path";
 import express from 'express';
@@ -19,7 +19,8 @@ const options = {
     cert: fs.readFileSync("./certs/server.crt")
 };
 
-// Init Express server
+// === EXPRESS SERVER ===
+
 import session from 'express-session';
 const app = express();
 
@@ -36,18 +37,30 @@ app.use(session({
 const server = https.createServer(options, app);
 server.listen(PORT, console.log("Server listening on port " + PORT));
 
-app.get('/', (req, res, next) => {
-    
-});
+import cors from 'cors';
+import { register, login } from './routes/auth.js';
+import { getMessageHistory } from './routes/message.js';
+import { createGroup, deleteGroup } from "./routes/group.js";
+import { createChannel, deleteChannel } from "./routes/channel.js";
 
-// Init websocket server
+app.use(cors());
+app.use('/auth/register', register);
+app.use('/auth/login', login);
+app.use('/message/history', getMessageHistory);
+app.use('/group/create', createGroup);
+app.use('/group/delete', deleteGroup);
+app.use('/channel/create', createChannel);
+app.use('/channel/delete', deleteChannel);
+
+// === WEBSOCKET SERVER ===
+
 const wss = new WebSocketServer({ server: server });
 
 wss.on('listening', () => {
     console.log("WebSocketServer listening on port " + wss.address().address + wss.address().port);
 });
 
-import { Message } from "./models/SQL.js";
+import { Message } from "./models/Message.js";
 
 wss.on('connection', (ws, req) => {
     console.log('New client connected.');
@@ -58,37 +71,15 @@ wss.on('connection', (ws, req) => {
         try {
             let json = JSON.parse(data);
 
-            switch (json.method) {
-                case "sendMessage":
-                    let message;
-                    await Message.create({ userId: json.userId, content: json.messageContent, sentAt: json.timestamp }).then(res => {
-                        message = res;
-                    }).catch(err => console.log(err));
-
-                    if (message) {
-                        wss.clients.forEach(client => {
-                            client.send(JSON.stringify({ ok: true, method: "sendMessage", data: message }));
-                        });
-                    } else {
-                        ws.send(JSON.stringify({ ok: false, reason: "Message could not be saved." }));
-                    }
-
-                    break;
-
-                case "getMessageHistory":
-                    let messages = await Message.findAll({ limit: 100, order: [['sentAt', 'ASC']] });
-
-                    ws.send(JSON.stringify({ ok: true, method: json.method, data: messages }));
-                    break;
-
-                default:
-                    ws.send(JSON.stringify({ ok: false, reason: "Bad method." }));
-                    break;
-            }
-        } catch (error) {
-
-        }
-
+            await Message.create({ userId: json.userId, channelId: json.channelId, content: json.content, sentAt: json.sentAt }).then(message => {
+                wss.clients.forEach(client => {
+                    client.send(JSON.stringify({ ok: true, data: message }));
+                });
+            }).catch(err => {
+                console.log(err);
+                ws.send(JSON.stringify({ ok: false, reason: "Message could not be saved." }));
+            });
+        } catch (error) { }
     });
     ws.on('error', err => console.log('Websocket error: ' + err));
 });
