@@ -14,10 +14,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 4111;
-const options = {
-    key: fs.readFileSync("./certs/server.key"),
-    cert: fs.readFileSync("./certs/server.crt")
-};
+const options = {};
+if (process.env.DEVMODE) {
+    options.key = fs.readFileSync("./certs/server.key");
+    options.cert = fs.readFileSync("./certs/server.crt");
+}
 
 // === EXPRESS SERVER ===
 
