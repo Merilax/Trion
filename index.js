@@ -44,10 +44,12 @@ import channelRouter from "./routes/channel.js";
 import groupRouter from "./routes/group.js";
 import messageRouter from './routes/message.js';
 import userRouter from './routes/user.js';
+import rootRouter from "./routes/root.js";
 
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/', rootRouter);
 app.use('/auth', authRouter);
 app.use('/channel', channelRouter);
 app.use('/group', groupRouter);
