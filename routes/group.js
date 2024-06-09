@@ -1,11 +1,12 @@
 import * as express from 'express';
 const groupRouter = express.Router();
+import { checkAuthToken } from './auth.js';
 import { Channel } from '../models/Channel.js';
 import { Group } from '../models/Group.js';
 import { UserGroups } from '../models/UserGroups.js';
-import { checkAuthToken } from './auth.js';
+import { User } from '../models/User.js';
 
-groupRouter.post('/:id(\d+)', checkAuthToken, async (req, res) => {
+groupRouter.post('/:id', checkAuthToken, async (req, res) => {
     const body = req.body;
     const params = req.params;
 
@@ -16,13 +17,24 @@ groupRouter.post('/:id(\d+)', checkAuthToken, async (req, res) => {
         return res.status(404).json({ ok: false, reason: "Group not found." });
 });
 
-groupRouter.post('/:id(\d+)/channels', checkAuthToken, async (req, res) => {
+groupRouter.post('/:id/channels', checkAuthToken, async (req, res) => {
     const body = req.body;
     const params = req.params;
 
     const channels = await Channel.findAll({ where: { groupId: parseInt(params.id) } });
     if (channels)
         return res.status(200).json({ ok: true, data: channels });
+    else
+        return res.status(404).json({ ok: false, reason: "Group not found." });
+});
+
+groupRouter.post('/:id/members', checkAuthToken, async (req, res) => {
+    const body = req.body;
+    const params = req.params;
+
+    const members = await UserGroups.findAll({ where: { groupId: parseInt(params.id) }, include: User });
+    if (members)
+        return res.status(200).json({ ok: true, data: members });
     else
         return res.status(404).json({ ok: false, reason: "Group not found." });
 });
@@ -49,7 +61,7 @@ groupRouter.post('/create', checkAuthToken, async (req, res) => {
     }
 });
 
-groupRouter.post('/:id(\d+)/delete', checkAuthToken, async (req, res) => {
+groupRouter.post('/:id/delete', checkAuthToken, async (req, res) => {
     const body = req.body;
     const params = req.params;
 

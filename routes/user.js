@@ -1,10 +1,10 @@
 import * as express from 'express';
 const authRouter = express.Router();
+import { checkAuthToken } from './auth.js';
 import { Group } from '../models/Group.js';
 import { UserGroups } from '../models/UserGroups.js';
-import { checkAuthToken } from './auth.js';
 
-authRouter.get('/:id/groups', checkAuthToken, async (req, res) => {
+authRouter.post('/:id/groups', checkAuthToken, async (req, res) => {
     const body = req.body;
     const params = req.params;
 

@@ -24,7 +24,7 @@ const DirectChannel = sequelize.define("directChannel", {
 
 DirectChannel.hasMany(Message, {
     sourceKey: 'id',
-    foreignKey: 'channelId',
+    foreignKey: 'directChannelId',
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
 });

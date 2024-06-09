@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
-import { Message } from './Message.js'; 
+import { Message } from './Message.js';
 
 const Channel = sequelize.define("channel", {
     id: {
@@ -19,11 +19,6 @@ const Channel = sequelize.define("channel", {
     },
     description: {
         type: DataTypes.TEXT
-    },
-    allowJoining: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true
     }
 }, {
     sequelize,

@@ -62,6 +62,8 @@ wss.on('listening', () => {
     console.log("WebSocketServer listening on port " + wss.address().address + wss.address().port);
 });
 
+import jwt from "jsonwebtoken";
+import { User } from "./models/User.js";
 import { Message } from "./models/Message.js";
 
 wss.on('connection', (ws, req) => {
@@ -77,24 +79,30 @@ wss.on('connection', (ws, req) => {
             if (exp < Date.now() / 1000);
             if (parseInt(sub) != parseInt(json.userId)) return;
 
-            const message = await Message.create({ userId: parseInt(json.userId), channelId: parseInt(json.channelId), content: json.content, sentAt: parseInt(json.sentAt) })
-            //.catch(err => console.log(err));
+            if (!json.channelId && !json.directChannelId) return;
+
+            let message = await Message.create({
+                userId: parseInt(json.userId),
+                channelId: json.channelId ? parseInt(json.channelId) : null,
+                directChannelId: json.directChannelId ? parseInt(json.directChannelId) : null,
+                content: json.content,
+                sentAt: parseInt(json.sentAt)
+            });
+            message = await Message.findOne({ where: { id: message.id }, include: User });
 
             wss.clients.forEach(client => {
                 client.send(JSON.stringify(message));
             });
-        } catch (error) { }
+        } catch (error) { console.log(error); }
     });
     ws.on('error', err => console.log('Websocket error: ' + err));
 });
 
 // === PROCESS EXIT CLEANUP ===
 
-import { sequelize } from "./models/SQL.js";
-
 let events = [
     { name: 'beforeExit', exitCode: 0 },
-    { name: 'uncaughtExecption', exitCode: 1 },
+    { name: 'uncaughtException', exitCode: 1 },
     { name: 'SIGINT', exitCode: 130 },
     { name: 'SIGTERM', exitCode: 143 }
 ];

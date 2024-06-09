@@ -108,6 +108,8 @@ authRouter.post('/login', async (req, res) => {
 });
 
 function checkAuthToken(req, res, next) {
+    const body = req.body;
+    
     try {
         const { authorization } = req.headers
         const token = authorization.substring('Bearer '.length);

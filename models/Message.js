@@ -13,7 +13,11 @@ const Message = sequelize.define("message", {
     },
     channelId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true
+    },
+    directChannelId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     content: {
         type: DataTypes.TEXT,
