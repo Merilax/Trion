@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 4111;
 const options = {};
-if (process.env.DEVMODE) {
+if (process.env.DEVMODE == true) {
     options.key = fs.readFileSync("./certs/server.key");
     options.cert = fs.readFileSync("./certs/server.crt");
 }
