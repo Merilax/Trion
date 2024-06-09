@@ -1,6 +1,6 @@
+import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
 import { Message } from './Message.js';
-import { User } from './User.js';
 
 const DirectChannel = sequelize.define("directChannel", {
     id: {
@@ -22,19 +22,12 @@ const DirectChannel = sequelize.define("directChannel", {
     deletedAt: false
 });
 
-User.hasMany(DirectChannel, {
+DirectChannel.hasMany(Message, {
     sourceKey: 'id',
-    foreignKey: 'userId',
+    foreignKey: 'channelId',
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
 });
-DirectChannel.belongsTo(User, {
-    sourceKey: 'userId',
-    foreignKey: 'id',
-});
-Message.belongsTo(DirectChannel, {
-    sourceKey: 'channelId',
-    foreignKey: 'id'
-});
+Message.belongsTo(DirectChannel);
 
 export { DirectChannel }; 

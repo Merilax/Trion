@@ -1,4 +1,9 @@
+import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
+import { Credentials } from "./Credentials.js";
+import { DirectChannel } from "./DirectChannel.js";
+import { Message } from "./Message.js";
+import { UserGroups } from "./UserGroups.js";
 
 const User = sequelize.define("user", {
     id: {
@@ -29,5 +34,34 @@ const User = sequelize.define("user", {
     deletedAt: "deletedAt",
     paranoid: true
 });
+
+User.hasOne(Credentials, {
+    sourceKey: 'id',
+    foreignKey: 'userId',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+});
+User.hasMany(DirectChannel, {
+    sourceKey: 'id',
+    foreignKey: 'userId',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+});
+User.hasMany(Message, {
+    sourceKey: 'id',
+    foreignKey: 'userId',
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
+});
+User.hasMany(UserGroups, {
+    sourceKey: 'id',
+    foreignKey: 'userId',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+});
+Credentials.belongsTo(User);
+DirectChannel.belongsTo(User);
+Message.belongsTo(User);
+UserGroups.belongsTo(User);
 
 export { User }; 

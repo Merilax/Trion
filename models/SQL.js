@@ -8,7 +8,7 @@ const sequelize = new Sequelize(process.env.SQLURL, {
     //storage: 'database.sqlite',
     ssl: false,
     pool: {
-        max: 3,
+        max: 2,
         acquire: 15000,
         idle: 10000
     }

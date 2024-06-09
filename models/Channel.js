@@ -1,5 +1,6 @@
+import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
-import { Group } from './Group.js';
+import { Message } from './Message.js'; 
 
 const Channel = sequelize.define("channel", {
     id: {
@@ -33,15 +34,12 @@ const Channel = sequelize.define("channel", {
     deletedAt: false
 });
 
-Group.hasMany(Channel, {
+Channel.hasMany(Message, {
     sourceKey: 'id',
-    foreignKey: 'groupId',
+    foreignKey: 'channelId',
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
-})
-Channel.belongsTo(Group, {
-    sourceKey: 'groupId',
-    foreignKey: 'id'
 });
+Message.belongsTo(Channel);
 
 export { Channel }; 

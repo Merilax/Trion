@@ -1,16 +1,37 @@
+import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
-import { Group } from './Group.js';
-import { User } from './User.js';
 
 const UserGroups = sequelize.define("userGroups", {
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        primaryKey: true
     },
     groupId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        primaryKey: true
     },
+    isOwner: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    canManageGroup: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    canCreateChannels: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    canManageChannels: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
 }, {
     sequelize,
     tableName: "userGroups",
@@ -18,27 +39,6 @@ const UserGroups = sequelize.define("userGroups", {
     createdAt: "createdAt",
     updatedAt: false,
     deletedAt: false
-});
-
-User.hasMany(UserGroups, {
-    sourceKey: 'id',
-    foreignKey: 'userId',
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE'
-});
-Group.hasMany(UserGroups, {
-    sourceKey: 'id',
-    foreignKey: 'groupId',
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE'
-});
-UserGroups.belongsTo(User, {
-    sourceKey: 'userId',
-    foreignKey: 'id'
-});
-UserGroups.belongsTo(Group, {
-    sourceKey: 'groupId',
-    foreignKey: 'id'
 });
 
 export { UserGroups }; 

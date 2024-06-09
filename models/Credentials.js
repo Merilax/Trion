@@ -1,5 +1,5 @@
+import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
-import { User } from './User.js';
 
 const Credentials = sequelize.define("credentials", {
     userId: {
@@ -21,19 +21,7 @@ const Credentials = sequelize.define("credentials", {
     timestamps: true,
     createdAt: false,
     updatedAt: "updatedAt",
-    deletedAt: false,
-    paranoid: true
-});
-
-User.hasOne(Credentials, {
-    sourceKey: 'id',
-    foreignKey: 'userId',
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE'
-});
-Credentials.belongsTo(User, {
-    sourceKey: 'userId',
-    foreignKey: 'id'
+    deletedAt: false
 });
 
 export { Credentials }; 

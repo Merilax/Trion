@@ -1,13 +1,14 @@
-import { User } from '../models/User';
-import { Credentials } from '../models/Credentials';
 import { compare, genSalt, hash, } from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Router } from 'express';
+import * as express from 'express';
+const authRouter = express.Router();
+import { User } from '../models/User.js';
+import { Credentials } from '../models/Credentials.js';
 
-export async function register(req, res) {
+authRouter.post('/register', (req, res) => {
     const payload = req.body;
     try {
-        genSalt(saltRounds, (err, salt) => {
+        genSalt(10, (err, salt) => {
             if (err)
                 return res.status(500).json({ ok: false, reason: err });
 
@@ -15,48 +16,65 @@ export async function register(req, res) {
                 if (err)
                     return res.status(500).json({ ok: false, reason: err });
 
-                const user = await User.create({ username: payload.username });
-                if (user == null)
-                    return res.status(500).json({ ok: false, reason: err });
+                let user = null;
+                try {
+                    user = await User.create({ username: payload.username })
+                } catch (error) {
+                    return res.status(400).json({ ok: false, reason: "Username already exists." });
+                }
+                if (user === null)
+                    return res.status(500).json({ ok: false, reason: "User could not be created." });
 
-                const creds = await Credentials.create({
-                    userId: user.id,
-                    password: hash,
-                    salt: salt
-                });
-                if (creds == null) {
+                let creds = null;
+                try {
+                    creds = await Credentials.create({
+                        userId: user.id,
+                        password: hash,
+                        salt: salt
+                    });
+                } catch (error) {
                     user.destroy({ force: true });
-                    return res.status(500).json({ ok: false, reason: err });
+                    return res.status(500).json({ ok: false, reason: "Internal server error." });
                 }
 
-                const accessToken = jwt.sign({ username: payload.username, userId: user.id });
+                if (creds === null) {
+                    user.destroy({ force: true });
+                    return res.status(500).json({ ok: false, reason: "Credentials could not be created for user." });
+                }
 
+                const accessToken = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: "1d", subject: "" + user.id });
+
+                /*res.cookie('authToken', accessToken, {
+                    maxAge: 24 * 3600 * 1000, // hours
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    secure: true 
+                });*/
                 return res.status(200).json({
                     ok: true,
                     data: {
-                        user: user.toJSON(),
-                        token: accessToken,
+                        user: JSON.stringify(user)
                     },
                 });
             });
-        }).catch((err) => {
-            return res.status(500).json({ ok: false, reason: err, });
         });
     } catch (err) {
+        console.log(err);
         return res.status(500).json({ ok: false, reason: err });
     }
-}
+});
 
-export async function login(req, res) {
+authRouter.post('/login', async (req, res) => {
     const payload = req.body;
 
     try {
-        const user = await User.findOne({ where: { username: payload.username } });
-        if (user == null)
-            return res.status(500).json({ ok: false, reason: "No user matches the given username." });
+        let user = await User.findOne({ where: { username: payload.username } });
+        if (user === null)
+            return res.status(400).json({ ok: false, reason: "Wrong username and password." });
 
-        const creds = await Credentials.findOne({ where: { userId: user.userId } });
-        if (creds == null)
+        let creds = await user.getCredential();
+
+        if (creds === null)
             return res.status(500).json({ ok: false, reason: "No credentials found for user." });
 
         compare(payload.password, creds.password, (err, same) => {
@@ -64,10 +82,16 @@ export async function login(req, res) {
                 return res.status(500).json({ ok: false, reason: err });
 
             if (!same) {
-                return res.status(400).json({ ok: false, reason: "Incorrect password." });
+                return res.status(401).json({ ok: false, reason: "Wrong username or password." });
             } else {
-                const accessToken = generateAccessToken(payload.username, user.id);
+                const accessToken = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: '1d', subject: "" + user.id });
 
+                /*res.cookie('authToken', accessToken, {
+                    maxAge: 24 * 3600 * 1000, // hours
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    secure: true
+                });*/
                 return res.status(200).json({
                     ok: true,
                     data: {
@@ -77,10 +101,27 @@ export async function login(req, res) {
                 });
             }
         });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ ok: false, reason: "Internal server error." });
+    }
+});
+
+function checkAuthToken(req, res, next) {
+    try {
+        const { authorization } = req.headers
+        const token = authorization.substring('Bearer '.length);
+        const { sub, exp } = jwt.verify(token, process.env.JWT_SECRET);
+
+        if (exp < Date.now() / 1000) return res.status(401).json({ ok: false, reason: "Session expired. Login required." });
+
+        if (parseInt(sub) != body.userId) return res.status(403).json({ ok: false, reason: "Forbidden." });
+
+        next();
     } catch (error) {
-        return res.status(500).json({ ok: false, reason: err });
+        return res.status(401).json({ ok: false, reason: "Unauthorized." });
     }
 }
 
-Router().post("/auth/register", register);
-Router().post("/auth/login", login);
+export default authRouter;
+export { checkAuthToken };

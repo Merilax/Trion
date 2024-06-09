@@ -1,4 +1,7 @@
+import { DataTypes } from "sequelize";
 import { sequelize } from './SQL.js';
+import { Channel } from "./Channel.js";
+import { UserGroups } from "./UserGroups.js";
 
 const Group = sequelize.define("group", {
     id: {
@@ -17,10 +20,6 @@ const Group = sequelize.define("group", {
     iconBlob: {
         type: DataTypes.BLOB
     },
-    direct: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false
-    },
     allowJoining: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -34,5 +33,20 @@ const Group = sequelize.define("group", {
     updatedAt: false,
     deletedAt: false
 });
+
+Group.hasMany(Channel, {
+    sourceKey: 'id',
+    foreignKey: 'groupId',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+});
+Group.hasMany(UserGroups, {
+    sourceKey: 'id',
+    foreignKey: 'groupId',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+});
+Channel.belongsTo(Group);
+UserGroups.belongsTo(Group);
 
 export { Group }; 
