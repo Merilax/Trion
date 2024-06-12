@@ -16,26 +16,19 @@ authRouter.post('/register', (req, res) => {
                 if (err)
                     return res.status(500).json({ ok: false, reason: err });
 
-                let user = null;
-                try {
-                    user = await User.create({ username: payload.username })
-                } catch (error) {
-                    return res.status(400).json({ ok: false, reason: "Username already exists." });
-                }
-                if (user === null)
-                    return res.status(500).json({ ok: false, reason: "User could not be created." });
+                const [user, created] = await User.findOrCreate({ username: payload.username })
+                if (created)
+                    return res.status(404).json({ ok: false, reason: "Username already exists." });
 
-                let creds = null;
-                try {
-                    creds = await Credentials.create({
-                        userId: user.id,
-                        password: hash,
-                        salt: salt
-                    });
-                } catch (error) {
+
+                const creds = await Credentials.create({
+                    userId: user.id,
+                    password: hash,
+                    salt: salt
+                }).catch(error => {
                     user.destroy({ force: true });
                     return res.status(500).json({ ok: false, reason: "Internal server error." });
-                }
+                });
 
                 if (creds === null) {
                     user.destroy({ force: true });
@@ -53,7 +46,8 @@ authRouter.post('/register', (req, res) => {
                 return res.status(200).json({
                     ok: true,
                     data: {
-                        user: JSON.stringify(user)
+                        user: user.toJSON(),
+                        token: accessToken,
                     },
                 });
             });
@@ -109,7 +103,7 @@ authRouter.post('/login', async (req, res) => {
 
 function checkAuthToken(req, res, next) {
     const body = req.body;
-    
+
     try {
         const { authorization } = req.headers
         const token = authorization.substring('Bearer '.length);

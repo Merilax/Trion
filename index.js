@@ -1,4 +1,4 @@
-import "dotenv/config";
+import 'dotenv/config'
 //import config from "./config.json" assert { type: "json" };
 
 import path from "path";
@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 4111;
 const options = {};
-if (process.env.DEVMODE == true) {
+if (process.env.DEVMODE == "true") {
     options.key = fs.readFileSync("./certs/server.key");
     options.cert = fs.readFileSync("./certs/server.crt");
 }
@@ -106,13 +106,14 @@ wss.on('connection', (ws, req) => {
 
 let events = [
     { name: 'beforeExit', exitCode: 0 },
-    { name: 'uncaughtException', exitCode: 1 },
+//    { name: 'uncaughtException', exitCode: 1 },
     { name: 'SIGINT', exitCode: 130 },
     { name: 'SIGTERM', exitCode: 143 }
 ];
 
 events.forEach((e) => {
     process.on(e.name, () => {
+        
         sequelize.connectionManager.close()
             .then(() => {
                 console.log('Sequelize connection pool cleared.');

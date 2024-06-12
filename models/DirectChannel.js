@@ -9,8 +9,8 @@ const DirectChannel = sequelize.define("directChannel", {
         primaryKey: true,
         allowNull: false
     },
-    userId: {
-        type: DataTypes.INTEGER,
+    users: {
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: false,
     }
 }, {
