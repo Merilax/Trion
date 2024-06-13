@@ -40,13 +40,13 @@ Group.hasMany(Channel, {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
 });
-Group.hasMany(UserGroups, {
+Group.userGroup = Group.hasMany(UserGroups, {
     sourceKey: 'id',
     foreignKey: 'groupId',
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
 });
 Channel.belongsTo(Group);
-UserGroups.belongsTo(Group);
+UserGroups.group = UserGroups.belongsTo(Group);
 
 export { Group }; 

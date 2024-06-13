@@ -44,11 +44,14 @@ groupRouter.post('/:id/members', checkAuthToken, async (req, res) => {
 });
 
 groupRouter.post('/:id/join', checkAuthToken, async (req, res) => {
-    const { userId, groupId } = req.body;
+    const { userId } = req.body;
     const { id } = req.params;
 
-    if (!userId || !groupId || !id) return res.status(400).json({ ok: false, reason: "Bad request." });
+    if (!userId || !id) return res.status(400).json({ ok: false, reason: "Bad request." });
 
+    const group = await Group.findOne({ where: { id: parseInt(id) } });
+    if (group == null)
+        return res.status(404).json({ ok: false, reason: "Group not found." });
     let userGroup = await UserGroups.findOne({ where: { userId: parseInt(userId), groupId: parseInt(id) }, include: Group });
     if (userGroup)
         return res.status(403).json({ ok: false, reason: "Already in group." });
@@ -69,8 +72,10 @@ groupRouter.post('/', checkAuthToken, async (req, res) => {
     try {
         const group = await Group.create({ name: name });
         const userGroup = await UserGroups.create({ userId: userId, groupId: group.id, isOwner: true });
+        const obj = userGroup.get();
+        obj.group = group.get();
 
-        return res.status(200).json({ ok: true, data: group });
+        return res.status(200).json({ ok: true, data: obj });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ ok: false, reason: "Internal server error." });
@@ -91,6 +96,10 @@ groupRouter.post('/:id/leave', checkAuthToken, async (req, res) => {
         const destroyed = await UserGroups.destroy({ where: { userId: parseInt(userId), groupId: parseInt(id) } });
         if (destroyed === 0)
             return res.status(404).json({ ok: false, reason: "No group found." });
+
+        const membersLeft = await UserGroups.count({ where: { groupId: parseInt(id) } });
+        if (membersLeft === 0)
+            await Group.destroy({ where: { id: parseInt(id) } });
 
         return res.status(200).json({ ok: true });
     } catch (err) {
