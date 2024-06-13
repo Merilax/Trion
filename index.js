@@ -71,10 +71,6 @@ import { Message } from "./models/Message.js";
 import { sequelize } from "./models/SQL.js";
 
 wss.on('connection', (ws, req) => {
-    //console.log('New client connected.');
-
-    //ws.on('close', () => console.log('Client disconnected.'));
-
     ws.on('message', async data => {
         try {
             let json = JSON.parse(data);

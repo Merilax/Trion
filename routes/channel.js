@@ -5,7 +5,6 @@ import { Channel } from '../models/Channel.js';
 import { Message } from '../models/Message.js';
 import { UserGroups } from '../models/UserGroups.js';
 import { User } from '../models/User.js';
-import groupRouter from './group.js';
 
 channelRouter.post('/:id/get', checkAuthToken, async (req, res) => {
     const { groupId } = req.body;
