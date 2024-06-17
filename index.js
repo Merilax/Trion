@@ -5,6 +5,7 @@ import path from "path";
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import https from 'https';
+import http from 'http';
 import fs from 'fs';
 
 import { fileURLToPath } from 'url';
@@ -34,8 +35,11 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));*/
-
-const server = https.createServer(options, app);
+let server;
+if (process.env.DEVMODE == "true")
+    server = https.createServer(options, app);
+else
+    server = http.createServer(app);
 server.listen(PORT, console.log("Server listening on port " + PORT));
 
 import cors from 'cors';
@@ -102,14 +106,14 @@ wss.on('connection', (ws, req) => {
 
 let events = [
     { name: 'beforeExit', exitCode: 0 },
-//    { name: 'uncaughtException', exitCode: 1 },
+    //    { name: 'uncaughtException', exitCode: 1 },
     { name: 'SIGINT', exitCode: 130 },
     { name: 'SIGTERM', exitCode: 143 }
 ];
 
 events.forEach((e) => {
     process.on(e.name, () => {
-        
+
         sequelize.connectionManager.close()
             .then(() => {
                 console.log('Sequelize connection pool cleared.');
