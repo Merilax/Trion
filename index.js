@@ -51,7 +51,7 @@ import messageRouter from './routes/message.js';
 import userRouter from './routes/user.js';
 import rootRouter from "./routes/root.js";
 
-app.use(cors({ credentials: true, origin: true }));
+app.use(cors({ credentials: true, origin: true, allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/', rootRouter);
@@ -64,7 +64,7 @@ app.use('/user', userRouter);
 // === WEBSOCKET SERVER ===
 
 const wss = new WebSocketServer({ server: server });
-
+// 
 wss.on('listening', () => {
     console.log("WebSocketServer listening on port " + wss.address().address + wss.address().port);
 });
