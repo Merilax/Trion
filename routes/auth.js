@@ -17,7 +17,7 @@ authRouter.post('/register', (req, res) => {
                     return res.status(500).json({ ok: false, reason: err });
 
                 const [user, created] = await User.findOrCreate({ where: { username: payload.username }, defaults: { username: payload.username } });
-                if (created)
+                if (!created)
                     return res.status(404).json({ ok: false, reason: "Username already exists." });
 
 
