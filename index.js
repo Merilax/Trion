@@ -85,6 +85,8 @@ wss.on('connection', (ws, req) => {
 
             if (!json.channelId && !json.directChannelId) return;
 
+            if (json.content.length > 200) return;
+
             let message = await Message.create({
                 userId: parseInt(json.userId),
                 channelId: json.channelId ? parseInt(json.channelId) : null,
